@@ -15,17 +15,28 @@ def run_game():
     #ship related
     ship_rect.centerx = screen_rect.centerx
     ship_rect.bottom = screen_rect.bottom
-
+    right_direction, left_direction = False, False
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT :
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.KEYDOWN :
-                if event.key == pygame.K_RIGHT :
-                    ship_rect.centerx +=2
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    right_direction = True
                 if event.key == pygame.K_LEFT:
-                    ship_rect.centerx -=2
+                    left_direction = True
+            elif event.type == pygame.KEYUP:
+                right_direction = False
+                left_direction = False
+
+        if right_direction:
+            ship_rect.centerx += 2
+        if left_direction:
+            ship_rect.centerx -= 2
+     
+			
         screen.fill(bg_color)
         screen.blit(ship,ship_rect)
         pygame.display.flip()
