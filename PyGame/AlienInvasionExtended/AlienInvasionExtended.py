@@ -31,9 +31,9 @@ def run_game():
                 right_direction = False
                 left_direction = False
 
-        if right_direction:
+        if right_direction and ship_rect.right < screen_rect.right:
             ship_rect.centerx += 2
-        if left_direction:
+        if left_direction and ship_rect.left > screen_rect.left:
             ship_rect.centerx -= 2
      
 			
