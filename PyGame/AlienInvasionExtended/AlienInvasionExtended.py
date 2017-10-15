@@ -5,41 +5,83 @@ import sys
 def run_game():
     
     pygame.init()
-    screen = pygame.display.set_mode((700,700))
-    screen_rect = screen.get_rect()
-    ship = pygame.image.load('images/ship.jpg')
-    ship_rect = ship.get_rect()
-    pygame.display.set_caption('Alien Invasion')
-    bg_color = (230,230,230)
-
-    #ship related
-    ship_rect.centerx = screen_rect.centerx
-    ship_rect.bottom = screen_rect.bottom
-    right_direction, left_direction = False, False
+    ai_settings = Settings()
+    screen = pygame.display.set_mode((ai_settings.screen_width,ai_settings.screen_height))
+    gameState = GameState()
+    ship = Ship(screen,ai_settings,gameState)
+    pygame.display.set_caption(ai_settings.game_Caption)
+    
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT :
-                pygame.quit()
-                sys.exit()
+        update_game_state(gameState)
+        ship.do_update()
+        if gameState.bullet_fired:
+            bullet_rect = pygame.Rect(0,0,30,30)
+            bullet_rect.centerx = ship.ship_rect.centerx
+            #bullet_rect.top = ship_rect.top
+            pygame.draw.rect(screen,ai_settings.GREEN,bullet_rect) 
 
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    right_direction = True
-                if event.key == pygame.K_LEFT:
-                    left_direction = True
-            elif event.type == pygame.KEYUP:
-                right_direction = False
-                left_direction = False
-
-        if right_direction and ship_rect.right < screen_rect.right:
-            ship_rect.centerx += 2
-        if left_direction and ship_rect.left > screen_rect.left:
-            ship_rect.centerx -= 2
-     
-			
-        screen.fill(bg_color)
-        screen.blit(ship,ship_rect)
+        #screen.fill(bg_color)  fill seem to be hiding all drawing below.Need to figure out what is happening 
+        screen.blit(ship.ship,ship.ship_rect)
         pygame.display.flip()
 
+def update_game_state(gameState):
+    gameState.bullet_fired = False
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT :
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                gameState.ship_move_right = True
+            elif event.key == pygame.K_LEFT:
+                gameState.ship_move_left = True
+            elif event.key == pygame.K_SPACE:
+                gameState.bullet_fired = True
+        elif event.type == pygame.KEYUP:
+            gameState.ship_move_left = False
+            gameState.ship_move_right = False
+				
+class Settings():
+ 
+    def __init__(self):
+        self.screen_width = 1200
+        self.screen_height = 700
+        self.GRAY = (230,230,230)
+        self.GREEN = (0,255,0)
+        self.BLACK = (0,0,0)
+        self.bullet_width = 10
+        self.bullet_height = 10
+        self.bullet_color = self.BLACK
+        self.game_Caption = 'Alien Invasion'
+        self.image_location = 'images/ship.bmp'
+        
+class GameState():
+    
+    def __init__(self):
+        self.ship_move_right = False
+        self.ship_move_left = False
+        self.bullet_fired = False
+ 		
+
+class Ship():
+
+    def __init__(self,screen,ai_settings,gameState):
+        self.screen=screen
+        self.ship=pygame.image.load(ai_settings.image_location)
+        self.gameState = gameState
+        self.ship_rect = self.ship.get_rect()
+        self.screen_rect = self.screen.get_rect()
+        self.ship_rect.centerx = self.screen_rect.centerx
+        self.ship_rect.bottom = self.screen_rect.bottom
+		
+    def do_update(self):
+        if self.gameState.ship_move_right and self.ship_rect.right < self.screen_rect.right:
+            self.ship_rect.centerx += 1
+        if self.gameState.ship_move_left and self.ship_rect.left > self.screen_rect.left:
+            self.ship_rect.centerx -= 1
 
 run_game()
+
+
+
+
