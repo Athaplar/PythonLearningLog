@@ -15,16 +15,14 @@ def run_game():
         update_game_state(gameState)
         ship.do_update()
         if gameState.bullet_fired:
-            bullet_rect = pygame.Rect(0,0,30,30)
-            bullet_rect.centerx = ship.ship_rect.centerx
-            #bullet_rect.top = ship_rect.top
-            pygame.draw.rect(screen,ai_settings.GREEN,bullet_rect) 
-
+            bullet = Bullet(ship,screen,ai_settings)
+            bullet.do_update()
         #screen.fill(bg_color)  fill seem to be hiding all drawing below.Need to figure out what is happening 
-        screen.blit(ship.ship,ship.ship_rect)
+        
         pygame.display.flip()
 
 def update_game_state(gameState):
+
     gameState.bullet_fired = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT :
@@ -54,7 +52,21 @@ class Settings():
         self.bullet_color = self.BLACK
         self.game_Caption = 'Alien Invasion'
         self.image_location = 'images/ship.bmp'
-        
+
+class Bullet():
+     
+    def __init__(self, ship, screen, ai_settings):
+        self.ship = ship
+        self.screen = screen
+        self.ship = ship
+        self.ai_settings = ai_settings
+        self.bullet_rect = pygame.Rect(0,0,30,30)
+    
+    def do_update(self):    
+            self.bullet_rect.centerx = self.ship.ship_rect.centerx
+            #bullet_rect.top = ship_rect.top
+            pygame.draw.rect(self.screen,self.ai_settings.GREEN,self.bullet_rect) 
+	
 class GameState():
     
     def __init__(self):
@@ -75,11 +87,14 @@ class Ship():
         self.ship_rect.bottom = self.screen_rect.bottom
 		
     def do_update(self):
+	
         if self.gameState.ship_move_right and self.ship_rect.right < self.screen_rect.right:
             self.ship_rect.centerx += 1
         if self.gameState.ship_move_left and self.ship_rect.left > self.screen_rect.left:
             self.ship_rect.centerx -= 1
-
+			
+        self.screen.blit(self.ship,self.ship_rect)
+		
 run_game()
 
 
