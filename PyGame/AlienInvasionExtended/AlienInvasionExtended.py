@@ -10,15 +10,22 @@ def run_game():
     gameState = GameState()
     ship = Ship(screen,ai_settings,gameState)
     pygame.display.set_caption(ai_settings.game_Caption)
-    
+    bullets =[]
+	
     while True:
         update_game_state(gameState)
         ship.do_update()
         if gameState.bullet_fired:
             bullet = Bullet(ship,screen,ai_settings)
+            bullets.append(bullet)
+            		
+        for bullet in bullets:
             bullet.do_update()
-        #screen.fill(bg_color)  fill seem to be hiding all drawing below.Need to figure out what is happening 
-        
+      
+        screen.fill(ai_settings.GRAY)  #fill seem to be hiding all drawing below.Need to figure out what is happening 
+        ship.draw()
+        for bullet in bullets:
+            bullet.draw()    
         pygame.display.flip()
 
 def update_game_state(gameState):
@@ -52,20 +59,28 @@ class Settings():
         self.bullet_color = self.BLACK
         self.game_Caption = 'Alien Invasion'
         self.image_location = 'images/ship.bmp'
+        self.bullet_speed = 1
 
 class Bullet():
      
     def __init__(self, ship, screen, ai_settings):
         self.ship = ship
         self.screen = screen
-        self.ship = ship
+        self.ship_rect = ship.ship.get_rect()
         self.ai_settings = ai_settings
-        self.bullet_rect = pygame.Rect(0,0,30,30)
-    
+        self.bullet_rect = pygame.Rect(0,0,ai_settings.bullet_width,ai_settings.bullet_height)
+        self.bullet_rect.centerx = self.ship.ship_rect.centerx
+        self.bullet_rect.top = self.ship.ship_rect.top
+        self.y = float(self.ship.ship_rect.y)
+        #self.bullet_rect.top = 30
+        #pygame.draw.rect(self.screen,self.ai_settings.GREEN,self.bullet_rect)
+		
     def do_update(self):    
-            self.bullet_rect.centerx = self.ship.ship_rect.centerx
-            #bullet_rect.top = ship_rect.top
-            pygame.draw.rect(self.screen,self.ai_settings.GREEN,self.bullet_rect) 
+        self.y = self.y - self.ai_settings.bullet_speed
+        self.bullet_rect.y = self.y
+
+    def draw(self): 
+        pygame.draw.rect(self.screen,self.ai_settings.GREEN,self.bullet_rect)    
 	
 class GameState():
     
@@ -93,6 +108,7 @@ class Ship():
         if self.gameState.ship_move_left and self.ship_rect.left > self.screen_rect.left:
             self.ship_rect.centerx -= 1
 			
+    def draw(self):
         self.screen.blit(self.ship,self.ship_rect)
 		
 run_game()
