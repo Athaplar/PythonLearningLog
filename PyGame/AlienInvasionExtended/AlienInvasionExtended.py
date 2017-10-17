@@ -21,11 +21,16 @@ def run_game():
             		
         for bullet in bullets:
             bullet.do_update()
-      
+        bullets_copy = bullets.copy()
+        for bullet in bullets:
+            if bullet.y < 0:
+                bullets_copy.remove(bullet)			
+		
         screen.fill(ai_settings.GRAY)  #fill seem to be hiding all drawing below.Need to figure out what is happening 
         ship.draw()
         for bullet in bullets:
-            bullet.draw()    
+            bullet.draw()   
+        bullets = bullets_copy			
         pygame.display.flip()
 
 def update_game_state(gameState):
@@ -80,7 +85,7 @@ class Bullet():
         self.bullet_rect.y = self.y
 
     def draw(self): 
-        pygame.draw.rect(self.screen,self.ai_settings.GREEN,self.bullet_rect)    
+        pygame.draw.rect(self.screen,self.ai_settings.bullet_color,self.bullet_rect)    
 	
 class GameState():
     
