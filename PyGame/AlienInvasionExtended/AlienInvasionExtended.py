@@ -9,6 +9,7 @@ def run_game():
     screen = pygame.display.set_mode((ai_settings.screen_width,ai_settings.screen_height))
     gameState = GameState()
     ship = Ship(screen,ai_settings,gameState)
+    alien = Alien(screen,ai_settings)
     pygame.display.set_caption(ai_settings.game_Caption)
     bullets =[]
 	
@@ -29,9 +30,10 @@ def run_game():
 		
         screen.fill(ai_settings.GRAY)  #fill seem to be hiding all drawing below.Need to figure out what is happening 
         ship.draw()
+        alien.draw()
         for bullet in bullets:
             bullet.draw()   
-        bullets = bullets_copy			
+        bullets = bullets_copy
         pygame.display.flip()
 
 def update_game_state(gameState):
@@ -51,7 +53,22 @@ def update_game_state(gameState):
         elif event.type == pygame.KEYUP:
             gameState.ship_move_left = False
             gameState.ship_move_right = False
-				
+
+class Alien():
+    
+    def __init__(self,screen,ai_settings):
+	
+        self.alien = pygame.image.load(ai_settings.alien_image_location)
+        self.rect = self.alien.get_rect()
+        self.screen = screen
+        self.screen_rect = screen.get_rect()
+        self.alien_image_location = 'images/alien.bmp'
+		#self.rect.top = 0
+
+    def draw(self):
+        self.screen.blit(self.alien,self.rect)
+	 
+			
 class Settings():
  
     def __init__(self):
@@ -65,6 +82,7 @@ class Settings():
         self.bullet_color = self.BLACK
         self.game_Caption = 'Alien Invasion'
         self.image_location = 'images/ship.bmp'
+        self.alien_image_location = 'images/alien.bmp'
         self.bullet_speed = 1
         self.max_allowed_bullets = 3
 
