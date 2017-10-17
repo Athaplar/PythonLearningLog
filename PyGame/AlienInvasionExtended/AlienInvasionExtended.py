@@ -15,7 +15,8 @@ def run_game():
     while True:
         update_game_state(gameState)
         ship.do_update()
-        if gameState.bullet_fired:
+		
+        if gameState.bullet_fired and len(bullets) < ai_settings.max_allowed_bullets:
             bullet = Bullet(ship,screen,ai_settings)
             bullets.append(bullet)
             		
@@ -65,6 +66,7 @@ class Settings():
         self.game_Caption = 'Alien Invasion'
         self.image_location = 'images/ship.bmp'
         self.bullet_speed = 1
+        self.max_allowed_bullets = 3
 
 class Bullet():
      
