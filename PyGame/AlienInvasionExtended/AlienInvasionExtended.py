@@ -12,6 +12,7 @@ def run_game():
     alien = Alien(screen,ai_settings)
     pygame.display.set_caption(ai_settings.game_Caption)
     bullets =[]
+    is_hit = False
 	
     while True:
         update_game_state(gameState)
@@ -23,18 +24,36 @@ def run_game():
             		
         for bullet in bullets:
             bullet.do_update()
+            if bullet.has_collided_with(alien.rect):
+                is_hit = True
+			
         bullets_copy = bullets.copy()
         for bullet in bullets:
             if bullet.y < 0:
-                bullets_copy.remove(bullet)			
+                bullets_copy.remove(bullet)	
 		
+	
+			
         screen.fill(ai_settings.GRAY)  #fill seem to be hiding all drawing below.Need to figure out what is happening 
         ship.draw()
         alien.draw()
         for bullet in bullets:
             bullet.draw()   
         bullets = bullets_copy
+		
+        if is_hit:
+            display_hit(screen,ai_settings)
+		
         pygame.display.flip()
+
+
+def display_hit(screen,ai_settings): 
+    basicfont = pygame.font.SysFont(None, 30)
+    text = basicfont.render('Hit!', True, ai_settings.BLACK, ai_settings.GREEN)
+    text_rect = text.get_rect()
+    text_rect.centerx = screen.get_rect().centerx
+    text_rect.centery = screen.get_rect().centery
+    screen.blit(text, text_rect)
 
 def update_game_state(gameState):
 
@@ -104,12 +123,19 @@ class Bullet():
         self.bullet_rect.centerx = self.ship.ship_rect.centerx
         self.bullet_rect.top = self.ship.ship_rect.top
         self.y = float(self.ship.ship_rect.y)
+        self.x = float(self.ship.ship_rect.x)
         #self.bullet_rect.top = 30
         #pygame.draw.rect(self.screen,self.ai_settings.GREEN,self.bullet_rect)
 		
     def do_update(self):    
         self.y = self.y - self.ai_settings.bullet_speed
         self.bullet_rect.y = self.y
+	
+    def has_collided_with(self,rect):
+        deltay = self.y - rect.y
+        deltax = self.x - rect.x
+
+        return deltay < rect.height and deltax < rect.width	  
 
     def draw(self): 
         pygame.draw.rect(self.screen,self.ai_settings.bullet_color,self.bullet_rect)    
