@@ -32,6 +32,8 @@ def run_game():
             collison = bullet.has_collided_with(alien.rect)
             if collison:
                 score.score = score.score + 1
+                bullet.rect.x = -1 #Making bullet disappear by drawing it out side of the screen in next frame
+                bullet.rect.y = -1 
             if bullet.y < 0 or collison:
                 bullets_copy.remove(bullet)	
 		
@@ -124,9 +126,9 @@ class Bullet():
         self.screen = screen
         self.ship_rect = ship.ship.get_rect()
         self.ai_settings = ai_settings
-        self.bullet_rect = pygame.Rect(0,0,ai_settings.bullet_width,ai_settings.bullet_height)
-        self.bullet_rect.centerx = self.ship.ship_rect.centerx
-        self.bullet_rect.top = self.ship.ship_rect.top
+        self.rect = pygame.Rect(0,0,ai_settings.bullet_width,ai_settings.bullet_height)
+        self.rect.centerx = self.ship.ship_rect.centerx
+        self.rect.top = self.ship.ship_rect.top
         self.y = float(self.ship.ship_rect.y)
         self.x = float(self.ship.ship_rect.x)
         #self.bullet_rect.top = 30
@@ -134,7 +136,7 @@ class Bullet():
 		
     def do_update(self):    
         self.y = self.y - self.ai_settings.bullet_speed
-        self.bullet_rect.y = self.y
+        self.rect.y = self.y
 	
     def has_collided_with(self,rect):
         deltay = self.y - rect.y
@@ -142,7 +144,7 @@ class Bullet():
         return deltay < rect.height and deltax < rect.width	  
 
     def draw(self): 
-        pygame.draw.rect(self.screen,self.ai_settings.bullet_color,self.bullet_rect)    
+        pygame.draw.rect(self.screen,self.ai_settings.bullet_color,self.rect)    
 	
 class GameState():
     
