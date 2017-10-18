@@ -9,6 +9,7 @@ def run_game():
     screen = pygame.display.set_mode((ai_settings.screen_width,ai_settings.screen_height))
     gameState = GameState()
     ship = Ship(screen,ai_settings,gameState)
+	#ships = []
     alien = Alien(screen,ai_settings)
     pygame.display.set_caption(ai_settings.game_Caption)
     bullets =[]
@@ -32,8 +33,7 @@ def run_game():
             collison = bullet.has_collided_with(alien.rect)
             if collison:
                 score.score = score.score + 1
-                bullet.rect.x = -1 #Making bullet disappear by drawing it out side of the screen in next frame
-                bullet.rect.y = -1 
+                bullet.make_bullet_disappear_from_Screen()
             if bullet.y < 0 or collison:
                 bullets_copy.remove(bullet)	
 		
@@ -143,6 +143,10 @@ class Bullet():
         deltax = self.x - rect.x
         return deltay < rect.height and deltax < rect.width	  
 
+	def make_bullet_disappear_from_Screen(self):
+	    self.rect.x = -1 #Making bullet disappear by drawing it out side of the screen in next frame
+        self.rect.y = -1 
+    
     def draw(self): 
         pygame.draw.rect(self.screen,self.ai_settings.bullet_color,self.rect)    
 	
