@@ -143,8 +143,8 @@ class Bullet():
         deltax = self.x - rect.x
         return deltay < rect.height and deltax < rect.width	  
 
-	def make_bullet_disappear_from_Screen(self):
-	    self.rect.x = -1 #Making bullet disappear by drawing it out side of the screen in next frame
+    def make_bullet_disappear_from_Screen(self):
+        self.rect.x = -1 #Making bullet disappear by drawing it out side of the screen in next frame
         self.rect.y = -1 
     
     def draw(self): 
