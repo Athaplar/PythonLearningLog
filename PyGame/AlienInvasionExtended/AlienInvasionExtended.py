@@ -12,7 +12,8 @@ def run_game():
     alien = Alien(screen,ai_settings)
     pygame.display.set_caption(ai_settings.game_Caption)
     bullets =[]
-    is_hit = False
+    #is_hit = False
+    score = Score(screen,ai_settings)
 	
     while True:
         update_game_state(gameState)
@@ -24,12 +25,14 @@ def run_game():
             		
         for bullet in bullets:
             bullet.do_update()
-            if bullet.has_collided_with(alien.rect):
-                is_hit = True
+            
 			
         bullets_copy = bullets.copy()
         for bullet in bullets:
-            if bullet.y < 0:
+            collison = bullet.has_collided_with(alien.rect)
+            if collison:
+                score.score = score.score + 1
+            if bullet.y < 0 or collison:
                 bullets_copy.remove(bullet)	
 		
 	
@@ -37,12 +40,14 @@ def run_game():
         screen.fill(ai_settings.GRAY)  #fill seem to be hiding all drawing below.Need to figure out what is happening 
         ship.draw()
         alien.draw()
+        score.draw()
+		
         for bullet in bullets:
             bullet.draw()   
         bullets = bullets_copy
 		
-        if is_hit:
-            display_hit(screen,ai_settings)
+        #if is_hit:
+        #    display_hit(screen,ai_settings)
 		
         pygame.display.flip()
 
@@ -134,7 +139,6 @@ class Bullet():
     def has_collided_with(self,rect):
         deltay = self.y - rect.y
         deltax = self.x - rect.x
-
         return deltay < rect.height and deltax < rect.width	  
 
     def draw(self): 
@@ -147,7 +151,21 @@ class GameState():
         self.ship_move_left = False
         self.bullet_fired = False
 		
- 		
+
+class Score():
+    def __init__(self,screen,ai_settings):
+        self.screen = screen
+        self.screen_rect = screen.get_rect()
+        self.score = 0
+        self.ai_settings = ai_settings
+		#draw score top right
+    def draw(self):
+        basicfont = pygame.font.SysFont(None, 30)
+        text = basicfont.render('Score:'+str(self.score), True, self.ai_settings.BLACK, self.ai_settings.GREEN)
+        text_rect = text.get_rect()
+        text_rect.x = self.screen_rect.width-100
+        text_rect.y = 10
+        self.screen.blit(text, text_rect)
 
 class Ship():
 
