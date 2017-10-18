@@ -16,7 +16,7 @@ def run_game():
     while True:
         update_game_state(gameState)
         ship.do_update()
-		
+        alien.do_update()
         if gameState.bullet_fired and len(bullets) < ai_settings.max_allowed_bullets:
             bullet = Bullet(ship,screen,ai_settings)
             bullets.append(bullet)
@@ -62,9 +62,13 @@ class Alien():
         self.rect = self.alien.get_rect()
         self.screen = screen
         self.screen_rect = screen.get_rect()
-        self.alien_image_location = 'images/alien.bmp'
+        self.ai_settings = ai_settings
+        self.y = 0
 		#self.rect.top = 0
-
+    def do_update(self):
+        self.y +=self.ai_settings.alien_vertical_speed
+        self.rect.y = self.y
+	    
     def draw(self):
         self.screen.blit(self.alien,self.rect)
 	 
@@ -85,6 +89,9 @@ class Settings():
         self.alien_image_location = 'images/alien.bmp'
         self.bullet_speed = 1
         self.max_allowed_bullets = 3
+        self.alien_vertical_speed = .1
+        self.alien_image_location = 'images/alien.bmp'
+		
 
 class Bullet():
      
@@ -113,6 +120,7 @@ class GameState():
         self.ship_move_right = False
         self.ship_move_left = False
         self.bullet_fired = False
+		
  		
 
 class Ship():
