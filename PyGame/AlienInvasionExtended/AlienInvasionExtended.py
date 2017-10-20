@@ -32,7 +32,7 @@ def run_game():
 			
         bullets_copy = bullets.copy()
         for bullet in bullets:
-            collison = bullet.has_collided_with(alien.rect)
+            collison = alien.has_collided_with(bullet.rect)
             if collison:
                 score.score = score.score + 1
                 bullet.make_bullet_disappear_from_Screen()
@@ -107,9 +107,10 @@ class Alien():
         self.screen.blit(self.alien,self.rect)
 		
     def has_collided_with(self,rect):
-        deltay = fabs(self.y - rect.y)
-        deltax = fabs(self.x - rect.x)
-        return deltay < rect.height and deltax < rect.width		
+        deltay = fabs(self.rect.centery - rect.centery)
+        deltax = fabs(self.rect.centerx - rect.centerx)
+        return deltay < rect.height and deltax < rect.width	
+		
 class Settings():
  
     def __init__(self):
@@ -152,10 +153,6 @@ class Bullet():
         self.rect.x = -1 #Making bullet disappear by drawing it out side of the screen in next frame
         self.rect.y = -1 
 		
-    def has_collided_with(self,rect):
-        deltay = fabs(self.y - rect.y)
-        deltax = fabs(self.x - rect.x)
-        return deltay < rect.height and deltax < rect.width	
     def draw(self): 
         pygame.draw.rect(self.screen,self.ai_settings.bullet_color,self.rect)    
 	
@@ -192,8 +189,8 @@ class Ship():
         self.screen_rect = self.screen.get_rect()
         self.rect.centerx = self.screen_rect.centerx
         self.rect.bottom = self.screen_rect.bottom
-        self.x = self.rect.x
-        self.y = self.rect.y
+        self.x = float(self.rect.x)
+        self.y = float(self.rect.y)
 		
     def do_update(self):
 	
@@ -209,11 +206,7 @@ class Ship():
     def draw(self):
         self.screen.blit(self.ship,self.rect)
 
-    def has_collided_with(self,rect):
-        deltay = fabs(self.y - rect.y)
-        deltax = fabs(self.x - rect.x)
-        return deltay < self.rect.height and deltax < self.rect.width
-		
+ 		
 run_game()
 
 
