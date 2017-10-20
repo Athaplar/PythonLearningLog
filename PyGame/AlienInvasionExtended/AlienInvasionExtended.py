@@ -1,6 +1,7 @@
 
 import pygame
 import sys
+from math import fabs
 
 def run_game():
     
@@ -9,13 +10,14 @@ def run_game():
     screen = pygame.display.set_mode((ai_settings.screen_width,ai_settings.screen_height))
     gameState = GameState()
     ship = Ship(screen,ai_settings,gameState)
-	#ships = []
+    ships = []
     alien = Alien(screen,ai_settings)
     pygame.display.set_caption(ai_settings.game_Caption)
     bullets =[]
     #is_hit = False
     score = Score(screen,ai_settings)
-	
+    alien_ship_collison = False
+    
     while True:
         update_game_state(gameState)
         ship.do_update()
@@ -38,9 +40,14 @@ def run_game():
                 bullets_copy.remove(bullet)	
 		
 	
-			
+        alien_ship_collison = alien.has_collided_with(ship.rect)	
         screen.fill(ai_settings.GRAY)  #fill seem to be hiding all drawing below.Need to figure out what is happening 
-        ship.draw()
+        
+        if alien_ship_collison:
+            display_hit(screen,ai_settings)
+        else:
+            ship.draw()
+        
         alien.draw()
         score.draw()
 		
@@ -90,15 +97,19 @@ class Alien():
         self.screen_rect = screen.get_rect()
         self.ai_settings = ai_settings
         self.y = 0
+        self.x = 0
 		#self.rect.top = 0
     def do_update(self):
-        self.y +=self.ai_settings.alien_vertical_speed
+        self.y += self.ai_settings.alien_vertical_speed
         self.rect.y = self.y
 	    
     def draw(self):
         self.screen.blit(self.alien,self.rect)
-	 
-			
+		
+    def has_collided_with(self,rect):
+        deltay = fabs(self.y - rect.y)
+        deltax = fabs(self.x - rect.x)
+        return deltay < rect.height and deltax < rect.width		
 class Settings():
  
     def __init__(self):
@@ -124,13 +135,12 @@ class Bullet():
     def __init__(self, ship, screen, ai_settings):
         self.ship = ship
         self.screen = screen
-        self.ship_rect = ship.ship.get_rect()
         self.ai_settings = ai_settings
         self.rect = pygame.Rect(0,0,ai_settings.bullet_width,ai_settings.bullet_height)
-        self.rect.centerx = self.ship.ship_rect.centerx
-        self.rect.top = self.ship.ship_rect.top
-        self.y = float(self.ship.ship_rect.y)
-        self.x = float(self.ship.ship_rect.x)
+        self.rect.centerx = self.ship.rect.centerx
+        self.rect.top = self.ship.rect.top
+        self.y = float(self.ship.rect.y)
+        self.x = float(self.ship.rect.x)
         #self.bullet_rect.top = 30
         #pygame.draw.rect(self.screen,self.ai_settings.GREEN,self.bullet_rect)
 		
@@ -138,15 +148,14 @@ class Bullet():
         self.y = self.y - self.ai_settings.bullet_speed
         self.rect.y = self.y
 	
-    def has_collided_with(self,rect):
-        deltay = self.y - rect.y
-        deltax = self.x - rect.x
-        return deltay < rect.height and deltax < rect.width	  
-
     def make_bullet_disappear_from_Screen(self):
         self.rect.x = -1 #Making bullet disappear by drawing it out side of the screen in next frame
         self.rect.y = -1 
-    
+		
+    def has_collided_with(self,rect):
+        deltay = fabs(self.y - rect.y)
+        deltax = fabs(self.x - rect.x)
+        return deltay < rect.height and deltax < rect.width	
     def draw(self): 
         pygame.draw.rect(self.screen,self.ai_settings.bullet_color,self.rect)    
 	
@@ -179,20 +188,31 @@ class Ship():
         self.screen=screen
         self.ship=pygame.image.load(ai_settings.image_location)
         self.gameState = gameState
-        self.ship_rect = self.ship.get_rect()
+        self.rect = self.ship.get_rect()
         self.screen_rect = self.screen.get_rect()
-        self.ship_rect.centerx = self.screen_rect.centerx
-        self.ship_rect.bottom = self.screen_rect.bottom
+        self.rect.centerx = self.screen_rect.centerx
+        self.rect.bottom = self.screen_rect.bottom
+        self.x = self.rect.x
+        self.y = self.rect.y
 		
     def do_update(self):
 	
-        if self.gameState.ship_move_right and self.ship_rect.right < self.screen_rect.right:
-            self.ship_rect.centerx += 1
-        if self.gameState.ship_move_left and self.ship_rect.left > self.screen_rect.left:
-            self.ship_rect.centerx -= 1
-			
+        if self.gameState.ship_move_right and self.rect.right < self.screen_rect.right:
+            self.rect.centerx += 1
+        if self.gameState.ship_move_left and self.rect.left > self.screen_rect.left:
+            self.rect.centerx -= 1
+	
+    def make_ship_disappear_from_Screen(self):
+        self.x = -1
+        self.y = -1
+        
     def draw(self):
-        self.screen.blit(self.ship,self.ship_rect)
+        self.screen.blit(self.ship,self.rect)
+
+    def has_collided_with(self,rect):
+        deltay = fabs(self.y - rect.y)
+        deltax = fabs(self.x - rect.x)
+        return deltay < self.rect.height and deltax < self.rect.width
 		
 run_game()
 
