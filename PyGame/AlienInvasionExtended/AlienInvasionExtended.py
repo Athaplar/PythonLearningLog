@@ -47,16 +47,16 @@ def run_game():
         if alien_ship_collison:
             display_hit(screen,ai_settings)
             ship.crashed = True
-        
-        alien.draw()
-        score.draw()
-		
-        if not ship.crashed:
-            ship.draw()
-		
+      
         if ship.crashed or alien_has_moved_beyond_bottom_of_screen:
             ship.make_ship_disappear_from_Screen()
+            display_hit(screen,ai_settings)
+			  
+        alien.draw()
+        score.draw()
+        ship.draw()
 		
+      
         for bullet in bullets:
             bullet.draw()   
         bullets = bullets_copy
@@ -69,7 +69,7 @@ def run_game():
 
 def display_hit(screen,ai_settings): 
     basicfont = pygame.font.SysFont(None, 30)
-    text = basicfont.render('Hit!', True, ai_settings.BLACK, ai_settings.GREEN)
+    text = basicfont.render('Condition met!', True, ai_settings.BLACK, ai_settings.GREEN)
     text_rect = text.get_rect()
     text_rect.centerx = screen.get_rect().centerx
     text_rect.centery = screen.get_rect().centery
@@ -113,7 +113,7 @@ class Alien():
         self.screen.blit(self.alien,self.rect)
 
     def has_moved_beyond_bottom_of_screen(self):
-        return self.rect.centery > self.screen_rect.centery
+        return self.rect.bottom > self.screen_rect.bottom
 		
     def has_collided_with(self,rect):
         deltay = fabs(self.rect.centery - rect.centery)
@@ -136,7 +136,7 @@ class Settings():
         self.alien_image_location = 'images/alien.bmp'
         self.bullet_speed = 1
         self.max_allowed_bullets = 3
-        self.alien_vertical_speed = .1
+        self.alien_vertical_speed = .5
         self.alien_image_location = 'images/alien.bmp'
 		
 
@@ -198,8 +198,6 @@ class Ship():
         self.screen_rect = self.screen.get_rect()
         self.rect.centerx = self.screen_rect.centerx
         self.rect.bottom = self.screen_rect.bottom
-        self.x = float(self.rect.x)
-        self.y = float(self.rect.y)
         self.crashed = False
 		
     def do_update(self):
@@ -210,8 +208,8 @@ class Ship():
             self.rect.centerx -= 1
 	
     def make_ship_disappear_from_Screen(self):
-        self.x = -1
-        self.y = -1
+        self.rect.x = -100
+        self.rect.y = -100
         
     def draw(self):
         self.screen.blit(self.ship,self.rect)
