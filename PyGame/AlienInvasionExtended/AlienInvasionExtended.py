@@ -40,16 +40,22 @@ def run_game():
                 bullets_copy.remove(bullet)	
 		
 	
-        alien_ship_collison = alien.has_collided_with(ship.rect)	
+        alien_ship_collison = alien.has_collided_with(ship.rect)
+        alien_has_moved_beyond_bottom_of_screen = alien.has_moved_beyond_bottom_of_screen()		
         screen.fill(ai_settings.GRAY)  #fill seem to be hiding all drawing below.Need to figure out what is happening 
         
         if alien_ship_collison:
             display_hit(screen,ai_settings)
-        else:
-            ship.draw()
+            ship.crashed = True
         
         alien.draw()
         score.draw()
+		
+        if not ship.crashed:
+            ship.draw()
+		
+        if ship.crashed or alien_has_moved_beyond_bottom_of_screen:
+            ship.make_ship_disappear_from_Screen()
 		
         for bullet in bullets:
             bullet.draw()   
@@ -105,6 +111,9 @@ class Alien():
 	    
     def draw(self):
         self.screen.blit(self.alien,self.rect)
+
+    def has_moved_beyond_bottom_of_screen(self):
+        return self.rect.centery > self.screen_rect.centery
 		
     def has_collided_with(self,rect):
         deltay = fabs(self.rect.centery - rect.centery)
@@ -191,6 +200,7 @@ class Ship():
         self.rect.bottom = self.screen_rect.bottom
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
+        self.crashed = False
 		
     def do_update(self):
 	
