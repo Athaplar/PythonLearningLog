@@ -10,11 +10,10 @@ def run_game():
     screen = pygame.display.set_mode((ai_settings.screen_width,ai_settings.screen_height))
     gameState = GameState()
     ship = Ship(screen,ai_settings,gameState)
-    ships = []
+    ships = init_ships(screen, ai_settings, gameState)
     alien = Alien(screen,ai_settings)
     pygame.display.set_caption(ai_settings.game_Caption)
     bullets =[]
-    #is_hit = False
     score = Score(screen,ai_settings)
     alien_ship_collison = False
     
@@ -51,7 +50,8 @@ def run_game():
         if ship.crashed or alien_has_moved_beyond_bottom_of_screen:
             ship.make_ship_disappear_from_Screen()
             display_hit(screen,ai_settings)
-			  
+			
+        draw(ships, screen, ai_settings)  
         alien.draw()
         score.draw()
         ship.draw()
@@ -66,6 +66,27 @@ def run_game():
 		
         pygame.display.flip()
 
+
+def draw(items, screen, ai_settings):
+    for item in items:
+        item.draw()
+        #display_hit(screen,ai_settings)
+	
+def init_ships(screen, ai_settings, gameState):
+    #ships = [ Ship(screen,ai_settings,gameState) for _ in range(ai_settings.num_of_ships)]
+    ships = [Ship(screen,ai_settings,gameState),Ship(screen,ai_settings,gameState),Ship(screen,ai_settings,gameState)]
+    width = ships[0].rect.width
+    height = ships[0].rect.height
+    x_screen = ai_settings.screen_width - 100 - ai_settings.num_of_ships * width# 100 because score object is draw at right most place
+    y_screen = 10 # + ai_settings.space_btw_ships
+    index =0
+    for ship in ships:
+        ship.rect.x = x_screen +   index * width # + ai_settings.space_btw_ships 
+        ship.rect.y = y_screen
+        index+=1
+    return ships	
+	
+    
 
 def display_hit(screen,ai_settings): 
     basicfont = pygame.font.SysFont(None, 30)
@@ -136,8 +157,10 @@ class Settings():
         self.alien_image_location = 'images/alien.bmp'
         self.bullet_speed = 1
         self.max_allowed_bullets = 3
-        self.alien_vertical_speed = .5
+        self.alien_vertical_speed = .1
         self.alien_image_location = 'images/alien.bmp'
+        self.num_of_ships = 3
+        self.space_btw_ships = 5
 		
 
 class Bullet():
@@ -199,6 +222,8 @@ class Ship():
         self.rect.centerx = self.screen_rect.centerx
         self.rect.bottom = self.screen_rect.bottom
         self.crashed = False
+        self.x_screen = 0
+        self.y_screen = 0
 		
     def do_update(self):
 	
