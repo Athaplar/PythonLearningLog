@@ -16,6 +16,8 @@ def run_game():
     score = Score(screen,ai_settings)
     ship = ships[0]
     ship.set_status(ShipStatus.ON)
+    fleet_of_alien = Fleet_Of_Alien(screen,ai_settings)
+    fleet_of_alien.spawn_alien_fleet()
 	
     while True:
         update_game_state(gameState)
@@ -54,6 +56,7 @@ def run_game():
         draw(ships, screen, ai_settings)  
         alien.draw()
         score.draw()
+        draw(fleet_of_alien.alien_fleet, screen, ai_settings)
         
       
         for bullet in bullets:
@@ -64,6 +67,8 @@ def run_game():
         #    display_hit(screen,ai_settings)
 		
         pygame.display.flip()
+
+
 
 def next_ship_life(ships, screen, ai_settings):
     for ship in ships:
@@ -120,6 +125,28 @@ def update_game_state(gameState):
             gameState.ship_move_left = False
             gameState.ship_move_right = False
 
+			
+class Fleet_Of_Alien():
+    """
+    Takes care of Alien motion (downwards/side ways)
+    Knows the screen dimension and number of aliens to spawn
+    """
+    def __init__(self, screen, ai_settings):
+        self.screen = screen
+        self.ai_settings = ai_settings
+        self.alien_fleet=None
+	
+    def spawn_alien_fleet(self):
+        first_alien = Alien(self.screen, self.ai_settings)
+        num_of_aliens_in_a_row = self.ai_settings.screen_width / (first_alien.rect.width + self.ai_settings.space_btw_ships)
+        self.alien_fleet = [Alien(self.screen,self.ai_settings) for _ in range(int(num_of_aliens_in_a_row))]
+        index=1
+        for alien in self.alien_fleet:
+            alien.x = first_alien.rect.width * index
+            alien.rect.x = alien.x
+            index+=1
+        self.alien_fleet.insert(0,first_alien)
+
 class Alien():
     
     def __init__(self,screen,ai_settings):
@@ -171,6 +198,7 @@ class Settings():
         self.alien_image_location = 'images/alien.bmp'
         self.num_of_ships = 3
         self.space_btw_ships = 5
+        self.space_btw_aliens = 0
 		
 
 class Bullet():
