@@ -9,14 +9,14 @@ def run_game():
     ai_settings = Settings()
     screen = pygame.display.set_mode((ai_settings.screen_width,ai_settings.screen_height))
     gameState = GameState()
-    ship = Ship(screen,ai_settings,gameState)
     ships = init_ships(screen, ai_settings, gameState)
     alien = Alien(screen,ai_settings)
     pygame.display.set_caption(ai_settings.game_Caption)
     bullets =[]
     score = Score(screen,ai_settings)
-    alien_ship_collison = False
-    
+    ship = ships[0]
+    ship.set_status(ShipStatus.ON)
+	
     while True:
         update_game_state(gameState)
         ship.do_update()
@@ -43,19 +43,18 @@ def run_game():
         alien_has_moved_beyond_bottom_of_screen = alien.has_moved_beyond_bottom_of_screen()		
         screen.fill(ai_settings.GRAY)  #fill seem to be hiding all drawing below.Need to figure out what is happening 
         
-        if alien_ship_collison:
-            display_hit(screen,ai_settings)
-            ship.crashed = True
+        if alien_ship_collison or alien_has_moved_beyond_bottom_of_screen:
+            #display_hit(screen,ai_settings)
+            ship.set_status(ShipStatus.CRASHED)
+            ship = next_ship_life(ships,screen,ai_settings)
+            ship.set_status(ShipStatus.ON)
+            alien.reset()
+            #alien_has_moved_beyond_bottom_of_screen = False
       
-        if ship.crashed or alien_has_moved_beyond_bottom_of_screen:
-            ship.make_ship_disappear_from_Screen()
-            display_hit(screen,ai_settings)
-			
         draw(ships, screen, ai_settings)  
         alien.draw()
         score.draw()
-        ship.draw()
-		
+        
       
         for bullet in bullets:
             bullet.draw()   
@@ -65,6 +64,12 @@ def run_game():
         #    display_hit(screen,ai_settings)
 		
         pygame.display.flip()
+
+def next_ship_life(ships, screen, ai_settings):
+    for ship in ships:
+        if ship.status is ShipStatus.OFF:
+            ship.status = ShipStatus.ON
+            return ship
 
 
 def draw(items, screen, ai_settings):
@@ -81,8 +86,9 @@ def init_ships(screen, ai_settings, gameState):
     y_screen = 10 # + ai_settings.space_btw_ships
     index =0
     for ship in ships:
-        ship.rect.x = x_screen +   index * width # + ai_settings.space_btw_ships 
-        ship.rect.y = y_screen
+        ship.x_screen = x_screen +   index * width # + ai_settings.space_btw_ships 
+        ship.y_screen = y_screen
+        ship.set_status(ShipStatus.OFF)
         index+=1
     return ships	
 	
@@ -129,7 +135,11 @@ class Alien():
     def do_update(self):
         self.y += self.ai_settings.alien_vertical_speed
         self.rect.y = self.y
-	    
+	
+    def reset(self): #THis method only aids in testing with one alien
+        self.y=0
+        self.rect.y=0
+		
     def draw(self):
         self.screen.blit(self.alien,self.rect)
 
@@ -157,7 +167,7 @@ class Settings():
         self.alien_image_location = 'images/alien.bmp'
         self.bullet_speed = 1
         self.max_allowed_bullets = 3
-        self.alien_vertical_speed = .1
+        self.alien_vertical_speed = .6
         self.alien_image_location = 'images/alien.bmp'
         self.num_of_ships = 3
         self.space_btw_ships = 5
@@ -219,19 +229,27 @@ class Ship():
         self.gameState = gameState
         self.rect = self.ship.get_rect()
         self.screen_rect = self.screen.get_rect()
-        self.rect.centerx = self.screen_rect.centerx
-        self.rect.bottom = self.screen_rect.bottom
-        self.crashed = False
         self.x_screen = 0
         self.y_screen = 0
+        self.status = ShipStatus.OFF
 		
+    def set_status(self,status_update):
+	
+        if status_update is ShipStatus.ON:
+            self.rect.centerx = self.screen_rect.centerx
+            self.rect.bottom = self.screen_rect.bottom
+        else:
+            self.rect.x = self.x_screen
+            self.rect.y = self.y_screen
+        self.status = status_update
+
     def do_update(self):
-	
-        if self.gameState.ship_move_right and self.rect.right < self.screen_rect.right:
-            self.rect.centerx += 1
-        if self.gameState.ship_move_left and self.rect.left > self.screen_rect.left:
-            self.rect.centerx -= 1
-	
+            if self.gameState.ship_move_right and self.rect.right < self.screen_rect.right:
+                self.rect.centerx += 1
+            if self.gameState.ship_move_left and self.rect.left > self.screen_rect.left:
+                self.rect.centerx -= 1
+       
+			
     def make_ship_disappear_from_Screen(self):
         self.rect.x = -100
         self.rect.y = -100
@@ -239,7 +257,13 @@ class Ship():
     def draw(self):
         self.screen.blit(self.ship,self.rect)
 
- 		
+from enum import Enum
+class ShipStatus(Enum):
+    ON = 1
+    OFF = 2
+    CRASHED = 3
+	
+
 run_game()
 
 
