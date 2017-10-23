@@ -10,19 +10,20 @@ def run_game():
     screen = pygame.display.set_mode((ai_settings.screen_width,ai_settings.screen_height))
     gameState = GameState()
     ships = init_ships(screen, ai_settings, gameState)
-    alien = Alien(screen,ai_settings)
+    alien = Alien(screen,ai_settings,gameState)
     pygame.display.set_caption(ai_settings.game_Caption)
     bullets =[]
     score = Score(screen,ai_settings)
     ship = ships[0]
     ship.set_status(ShipStatus.ON)
-    fleet_of_alien = Fleet_Of_Alien(screen,ai_settings)
+    fleet_of_alien = Fleet_Of_Alien(screen,ai_settings,gameState)
     fleet_of_alien.spawn_alien_fleet()
 	
     while True:
         update_game_state(gameState)
         ship.do_update()
         alien.do_update()
+        fleet_of_alien.do_update()
         if gameState.bullet_fired and len(bullets) < ai_settings.max_allowed_bullets:
             bullet = Bullet(ship,screen,ai_settings)
             bullets.append(bullet)
@@ -131,25 +132,37 @@ class Fleet_Of_Alien():
     Takes care of Alien motion (downwards/side ways)
     Knows the screen dimension and number of aliens to spawn
     """
-    def __init__(self, screen, ai_settings):
+    def __init__(self, screen, ai_settings,gameState):
         self.screen = screen
         self.ai_settings = ai_settings
-        self.alien_fleet=None
-	
+        self.alien_fleet = None
+        self.gameState = gameState
+		
+    def do_update(self):
+        for alien in self.alien_fleet:
+            alien.do_update()
+            if alien.x < 1:
+                self.gameState.alien_x_direction = MoveDirection.RIGHT
+            elif alien.x > 	self.ai_settings.useable_screen_width:
+                self.gameState.alien_x_direction = MoveDirection.LEFT
+
+
     def spawn_alien_fleet(self):
-        first_alien = Alien(self.screen, self.ai_settings)
-        num_of_aliens_in_a_row = self.ai_settings.screen_width / (first_alien.rect.width + self.ai_settings.space_btw_ships)
-        self.alien_fleet = [Alien(self.screen,self.ai_settings) for _ in range(int(num_of_aliens_in_a_row))]
+        first_alien = Alien(self.screen,self.ai_settings,self.gameState)
+        num_of_aliens_in_a_row = self.ai_settings.useable_screen_width / (first_alien.rect.width + self.ai_settings.space_btw_ships)
+        self.alien_fleet = [Alien(self.screen,self.ai_settings,self.gameState) for _ in range(int(num_of_aliens_in_a_row))]
         index=1
         for alien in self.alien_fleet:
             alien.x = first_alien.rect.width * index
             alien.rect.x = alien.x
             index+=1
         self.alien_fleet.insert(0,first_alien)
+	
+	
 
 class Alien():
     
-    def __init__(self,screen,ai_settings):
+    def __init__(self,screen,ai_settings,gameState):
 	
         self.alien = pygame.image.load(ai_settings.alien_image_location)
         self.rect = self.alien.get_rect()
@@ -158,12 +171,19 @@ class Alien():
         self.ai_settings = ai_settings
         self.y = 0
         self.x = 0
+        self.gameState = gameState
 		#self.rect.top = 0
     def do_update(self):
-        self.y += self.ai_settings.alien_vertical_speed
+	
+        speed = self.ai_settings.alien_x_speed
+        x = self.x
+        self.x = x - speed if self.gameState.alien_x_direction is MoveDirection.LEFT else x + speed
+        self.rect.x = self.x
+		
+        self.y = self.y + self.ai_settings.alien_vertical_speed
         self.rect.y = self.y
 	
-    def reset(self): #THis method only aids in testing with one alien
+    def reset(self): #This method only aids in testing with one alien
         self.y=0
         self.rect.y=0
 		
@@ -182,7 +202,9 @@ class Settings():
  
     def __init__(self):
         self.screen_width = 1200
+
         self.screen_height = 700
+        self.useable_screen_width = .8 * self.screen_width
         self.GRAY = (230,230,230)
         self.GREEN = (0,255,0)
         self.BLACK = (0,0,0)
@@ -194,7 +216,8 @@ class Settings():
         self.alien_image_location = 'images/alien.bmp'
         self.bullet_speed = 1
         self.max_allowed_bullets = 3
-        self.alien_vertical_speed = .6
+        self.alien_vertical_speed = .1
+        self.alien_x_speed = .1
         self.alien_image_location = 'images/alien.bmp'
         self.num_of_ships = 3
         self.space_btw_ships = 5
@@ -232,6 +255,8 @@ class GameState():
         self.ship_move_right = False
         self.ship_move_left = False
         self.bullet_fired = False
+        self.alien_x_direction = MoveDirection.RIGHT
+		
 		
 
 class Score():
@@ -291,7 +316,12 @@ class ShipStatus(Enum):
     OFF = 2
     CRASHED = 3
 	
-
+class MoveDirection(Enum):
+    LEFT = 1
+    RIGHT = 2
+    TOP = 3
+    DOWN = 4
+	
 run_game()
 
 
