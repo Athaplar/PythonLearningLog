@@ -10,7 +10,6 @@ def run_game():
     screen = pygame.display.set_mode((ai_settings.screen_width,ai_settings.screen_height))
     gameState = GameState()
     ships = init_ships(screen, ai_settings, gameState)
-    alien = Alien(screen,ai_settings,gameState)
     pygame.display.set_caption(ai_settings.game_Caption)
     bullets =[]
     score = Score(screen,ai_settings)
@@ -22,7 +21,6 @@ def run_game():
     while True:
         update_game_state(gameState)
         ship.do_update()
-        alien.do_update()
         fleet_of_alien.do_update()
         if gameState.bullet_fired and len(bullets) < ai_settings.max_allowed_bullets:
             bullet = Bullet(ship,screen,ai_settings)
@@ -34,7 +32,7 @@ def run_game():
 			
         bullets_copy = bullets.copy()
         for bullet in bullets:
-            collison = alien.has_collided_with(bullet.rect)
+            collison = fleet_of_alien.has_collided_with(bullet.rect)
             if collison:
                 score.score = score.score + 1
                 bullet.make_bullet_disappear_from_Screen()
@@ -42,8 +40,8 @@ def run_game():
                 bullets_copy.remove(bullet)	
 		
 	
-        alien_ship_collison = alien.has_collided_with(ship.rect)
-        alien_has_moved_beyond_bottom_of_screen = alien.has_moved_beyond_bottom_of_screen()		
+        alien_ship_collison = fleet_of_alien.has_collided_with(ship.rect)
+        alien_has_moved_beyond_bottom_of_screen = fleet_of_alien.any_alien_moved_beyond_bottom_of_screen()		
         screen.fill(ai_settings.GRAY)  #fill seem to be hiding all drawing below.Need to figure out what is happening 
         
         if alien_ship_collison or alien_has_moved_beyond_bottom_of_screen:
@@ -51,11 +49,10 @@ def run_game():
             ship.set_status(ShipStatus.CRASHED)
             ship = next_ship_life(ships,screen,ai_settings)
             ship.set_status(ShipStatus.ON)
-            alien.reset()
+            fleet_of_alien.spawn_alien_fleet()
             #alien_has_moved_beyond_bottom_of_screen = False
       
         draw(ships, screen, ai_settings)  
-        alien.draw()
         score.draw()
         draw(fleet_of_alien.alien_fleet, screen, ai_settings)
         
@@ -158,6 +155,19 @@ class Fleet_Of_Alien():
             index+=1
         self.alien_fleet.insert(0,first_alien)
 	
+    def has_collided_with(self,rect):
+        has_collided_with = False
+        for alien in self.alien_fleet:
+            if alien.has_collided_with(rect):
+                alien.make_disappear_from_Screen()
+                has_collided_with = True
+        return has_collided_with
+
+    def any_alien_moved_beyond_bottom_of_screen(self):
+        for alien in self.alien_fleet:
+            if alien.has_moved_beyond_bottom_of_screen():
+                return True
+        return False
 	
 
 class Alien():
@@ -198,6 +208,11 @@ class Alien():
         deltax = fabs(self.rect.centerx - rect.centerx)
         return deltay < rect.height and deltax < rect.width	
 		
+    def make_disappear_from_Screen(self):
+        self.rect.x = -1 
+        self.rect.y = -1 
+
+		
 class Settings():
  
     def __init__(self):
@@ -216,12 +231,13 @@ class Settings():
         self.alien_image_location = 'images/alien.bmp'
         self.bullet_speed = 1
         self.max_allowed_bullets = 3
-        self.alien_vertical_speed = .1
+        self.alien_vertical_speed = .5
         self.alien_x_speed = .1
         self.alien_image_location = 'images/alien.bmp'
         self.num_of_ships = 3
         self.space_btw_ships = 5
         self.space_btw_aliens = 0
+		
 		
 
 class Bullet():
