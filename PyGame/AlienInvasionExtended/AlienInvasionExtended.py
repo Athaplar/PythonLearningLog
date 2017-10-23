@@ -182,9 +182,13 @@ class Alien():
         self.y = 0
         self.x = 0
         self.gameState = gameState
+        self.crashed = False
 		#self.rect.top = 0
     def do_update(self):
-	
+	    
+        if self.crashed:
+             return
+
         speed = self.ai_settings.alien_x_speed
         x = self.x
         self.x = x - speed if self.gameState.alien_x_direction is MoveDirection.LEFT else x + speed
@@ -211,6 +215,7 @@ class Alien():
     def make_disappear_from_Screen(self):
         self.rect.x = -1 
         self.rect.y = -1 
+        self.crashed = True
 
 		
 class Settings():
