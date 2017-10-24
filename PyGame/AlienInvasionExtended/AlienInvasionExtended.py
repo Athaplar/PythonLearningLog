@@ -15,7 +15,7 @@ def run_game():
     score = Score(screen,ai_settings)
     ship = ships[0]
     ship.set_status(ShipStatus.ON)
-    fleet_of_alien = Fleet_Of_Alien(screen,ai_settings,gameState)
+    fleet_of_alien = Fleet_Of_Alien(screen,ai_settings,gameState,score)
     fleet_of_alien.spawn_alien_fleet()
 	
     while True:
@@ -32,15 +32,14 @@ def run_game():
 			
         bullets_copy = bullets.copy()
         for bullet in bullets:
-            collison = fleet_of_alien.has_collided_with(bullet.rect)
+            collison = fleet_of_alien.has_collided_with(bullet)
             if collison:
-                score.score = score.score + 1
                 bullet.make_bullet_disappear_from_Screen()
             if bullet.y < 0 or collison:
                 bullets_copy.remove(bullet)	
 		
 	
-        alien_ship_collison = fleet_of_alien.has_collided_with(ship.rect)
+        alien_ship_collison = fleet_of_alien.has_collided_with(ship)
         alien_has_moved_beyond_bottom_of_screen = fleet_of_alien.any_alien_moved_beyond_bottom_of_screen()		
         screen.fill(ai_settings.GRAY)  #fill seem to be hiding all drawing below.Need to figure out what is happening 
         
@@ -93,7 +92,7 @@ def init_ships(screen, ai_settings, gameState):
         ship.y_screen = y_screen
         ship.set_status(ShipStatus.OFF)
         index+=1
-    return ships	
+    return ships
 	
     
 
@@ -129,11 +128,12 @@ class Fleet_Of_Alien():
     Takes care of Alien motion (downwards/side ways)
     Knows the screen dimension and number of aliens to spawn
     """
-    def __init__(self, screen, ai_settings,gameState):
+    def __init__(self, screen, ai_settings,gameState, score):
         self.screen = screen
         self.ai_settings = ai_settings
         self.alien_fleet = None
         self.gameState = gameState
+        self.score = score
 		
     def do_update(self):
         for alien in self.alien_fleet:
@@ -153,14 +153,16 @@ class Fleet_Of_Alien():
             alien.x = first_alien.rect.width * index
             alien.rect.x = alien.x
             index+=1
-       
-	
-    def has_collided_with(self,rect):
+    
+    def has_collided_with(self,obj):
+        isBullet = type(obj) is Bullet
         has_collided_with = False
         for alien in self.alien_fleet:
-            if alien.has_collided_with(rect):
+            if alien.has_collided_with(obj.rect):
                 alien.make_disappear_from_Screen()
-                has_collided_with = True
+                if isBullet:
+                    self.score.score += 1
+                    has_collided_with = True
         return has_collided_with
 
     def any_alien_moved_beyond_bottom_of_screen(self):
