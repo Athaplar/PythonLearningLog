@@ -148,12 +148,12 @@ class Fleet_Of_Alien():
         first_alien = Alien(self.screen,self.ai_settings,self.gameState)
         num_of_aliens_in_a_row = self.ai_settings.useable_screen_width / (first_alien.rect.width + self.ai_settings.space_btw_ships)
         self.alien_fleet = [Alien(self.screen,self.ai_settings,self.gameState) for _ in range(int(num_of_aliens_in_a_row))]
-        index=1
+        index=0
         for alien in self.alien_fleet:
             alien.x = first_alien.rect.width * index
             alien.rect.x = alien.x
             index+=1
-        self.alien_fleet.insert(0,first_alien)
+       
 	
     def has_collided_with(self,rect):
         has_collided_with = False
@@ -196,10 +196,6 @@ class Alien():
 		
         self.y = self.y + self.ai_settings.alien_vertical_speed
         self.rect.y = self.y
-	
-    def reset(self): #This method only aids in testing with one alien
-        self.y=0
-        self.rect.y=0
 		
     def draw(self):
         self.screen.blit(self.alien,self.rect)
@@ -213,8 +209,8 @@ class Alien():
         return deltay < rect.height and deltax < rect.width	
 		
     def make_disappear_from_Screen(self):
-        self.rect.x = -1 
-        self.rect.y = -1 
+        self.rect.x = -100
+        self.rect.y = -100
         self.crashed = True
 
 		
@@ -228,7 +224,7 @@ class Settings():
         self.GRAY = (230,230,230)
         self.GREEN = (0,255,0)
         self.BLACK = (0,0,0)
-        self.bullet_width = 10
+        self.bullet_width = 100
         self.bullet_height = 10
         self.bullet_color = self.BLACK
         self.game_Caption = 'Alien Invasion'
@@ -236,7 +232,7 @@ class Settings():
         self.alien_image_location = 'images/alien.bmp'
         self.bullet_speed = 1
         self.max_allowed_bullets = 3
-        self.alien_vertical_speed = .5
+        self.alien_vertical_speed = .1
         self.alien_x_speed = .1
         self.alien_image_location = 'images/alien.bmp'
         self.num_of_ships = 3
