@@ -44,13 +44,13 @@ def run_game():
         screen.fill(ai_settings.GRAY)  #fill seem to be hiding all drawing below.Need to figure out what is happening 
         
         if alien_ship_collison or alien_has_moved_beyond_bottom_of_screen:
-            #display_hit(screen,ai_settings)
             ship.set_status(ShipStatus.CRASHED)
             ship = next_ship_life(ships,screen,ai_settings)
             ship.set_status(ShipStatus.ON)
+        
+        if fleet_of_alien.is_fleet_crashed():
             fleet_of_alien.spawn_alien_fleet()
-            #alien_has_moved_beyond_bottom_of_screen = False
-      
+			
         draw(ships, screen, ai_settings)  
         score.draw()
         draw(fleet_of_alien.alien_fleet, screen, ai_settings)
@@ -153,7 +153,13 @@ class Fleet_Of_Alien():
             alien.x = first_alien.rect.width * index
             alien.rect.x = alien.x
             index+=1
-    
+    def is_fleet_crashed(self):
+        
+        for alien in self.alien_fleet:
+            if not alien.crashed:
+                return False
+        return True
+
     def has_collided_with(self,obj):
         isBullet = type(obj) is Bullet
         has_collided_with = False
