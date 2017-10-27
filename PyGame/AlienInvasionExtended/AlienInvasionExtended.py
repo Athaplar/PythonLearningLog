@@ -146,11 +146,15 @@ class Fleet_Of_Alien():
 
     def spawn_alien_fleet(self):
         first_alien = Alien(self.screen,self.ai_settings,self.gameState)
-        num_of_aliens_in_a_row = self.ai_settings.useable_screen_width / (first_alien.rect.width + self.ai_settings.space_btw_ships)
+        alien_width = first_alien.rect.width
+        num_of_aliens_in_a_row = self.ai_settings.useable_screen_width  / (alien_width + self.ai_settings.space_btw_aliens)
         self.alien_fleet = [Alien(self.screen,self.ai_settings,self.gameState) for _ in range(int(num_of_aliens_in_a_row))]
         index=0
+        x_location = 0
         for alien in self.alien_fleet:
-            alien.x = first_alien.rect.width * index
+            alien.x = x_location
+            x_location += alien_width + self.ai_settings.space_btw_aliens
+            #alien.x = 0
             alien.rect.x = alien.x
             index+=1
     def is_fleet_crashed(self):
@@ -245,7 +249,7 @@ class Settings():
         self.alien_image_location = 'images/alien.bmp'
         self.num_of_ships = 3
         self.space_btw_ships = 5
-        self.space_btw_aliens = 0
+        self.space_btw_aliens = 50
 		
 		
 
